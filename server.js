@@ -1,7 +1,9 @@
 import express from "express";
 import bodyParser from "body-parser";
-import shoppingTract from "./routes/shoppingTract.js";
+import shoppingtracks from "./routes/shoppingTracks.js";
 import shoppingitems from "./routes/shoppingItems.js";
+import users from "./routes/users.js";
+import auth from "./routes/auth.js";
 import cors from "cors";
 
 const app = express();
@@ -17,8 +19,10 @@ app.use(express.json());
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/", shoppingTract);
-app.use("/", shoppingitems);
+app.use("/shoppingtracks", shoppingtracks);
+app.use("/shoppingitems", shoppingitems);
+app.use("/users", users);
+app.use("/login", auth);
 
 app.listen(port, () => {
   console.log(`Application started at: http://127.0.0.1:${port}`);

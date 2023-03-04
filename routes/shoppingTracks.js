@@ -4,17 +4,21 @@ import config from "../data/index.js";
 
 const router = express.Router();
 
-router.get("/shoppingtracks", async (req, res) => {
+router.get("/:user_id", async (req, res) => {
   try {
+    const user_id = req.params.user_id.split("=")[1];
     const pool = await sql.connect(config);
-    const result = await pool.request().query("SELECT * FROM ShoppingTracks");
+    const result = await pool
+      .request()
+      .query(`SELECT * FROM ShoppingTracks where user_id=${user_id}`);
+    console.log(result);
     res.json(result.recordset);
   } catch (err) {
     res.status(500).send(err);
   }
 });
 
-router.get("/shoppingtracks/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const pool = await sql.connect(config);
     const request = await pool
@@ -32,7 +36,7 @@ router.get("/shoppingtracks/:id", async (req, res) => {
   }
 });
 
-router.post("/shoppingtracks", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { user_id, date, total_price } = req.body;
     const pool = await sql.connect(config);
@@ -52,7 +56,7 @@ router.post("/shoppingtracks", async (req, res) => {
   }
 });
 
-router.put("/shoppingtracks/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const { total_price } = req.body;
     const pool = await sql.connect(config);
@@ -74,7 +78,7 @@ router.put("/shoppingtracks/:id", async (req, res) => {
   }
 });
 
-router.delete("/shoppingtracks/:id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const pool = await sql.connect(config);
     const request = await pool
