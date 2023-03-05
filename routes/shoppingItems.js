@@ -4,7 +4,7 @@ import config from "../data/index.js";
 
 const router = express.Router();
 
-router.get("/shoppingitems", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const pool = await sql.connect(config);
     const result = await pool.request().query("SELECT * FROM ShoppingItems");
@@ -14,42 +14,59 @@ router.get("/shoppingitems", async (req, res) => {
   }
 });
 
-router.get("/shoppingitems/:id", async (req, res) => {
+router.get("/:userid", async (req, res) => {
   try {
+    const userid = req.params.userid;
+
     const pool = await sql.connect(config);
-    const request = await pool
-      .request()
-      .input("id", sql.Int, req.params.id)
-      .query("SELECT * FROM ShoppingItems WHERE id = @id");
+    const request = await pool.request().input("id", sql.Int, req.params.id)
+      .query(`select shoppingtractid, user_id, date, total_price, b.id, item_id,item_title, 
+      item_price,quantity from ShoppingTracks a inner join ShoppingItems b on a.id=b.shoppingtractid where user_id=${userid}`);
 
     if (request.recordset.length === 0) {
       res.status(404).send("Shopping item not found");
     } else {
-      res.json(request.recordset[0]);
+      res.json(request.recordset);
     }
   } catch (err) {
     res.status(500).send(err);
   }
 });
 
-router.post("/shoppingitems", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const items = req.body;
-    // const shoppingtractid = items[0].shoppingtractid;
-    const shoppingtractid = 1;
-
+    const { cartItems, userId } = req.body;
     const pool = await sql.connect(config);
     const transaction = await pool.transaction();
 
     try {
       await transaction.begin();
 
-      for (const item of items) {
+      const request = await transaction
+        .request()
+        .input("user_id", sql.Int, userId) // add user_id input
+        .input(
+          "total_price",
+          sql.Decimal,
+          cartItems.reduce(
+            (total, item) => total + item.price * item.quantity,
+            0
+          )
+        ) // calculate total_price
+        .query(
+          `INSERT INTO ShoppingTracks (user_id, total_price,date) 
+          VALUES (@user_id, @total_price, GETDATE());
+          SELECT SCOPE_IDENTITY() AS id`
+        );
+
+      const shoppingtrackid = request.recordset[0].id;
+
+      for (const item of cartItems) {
         const { id, title, price, quantity } = item;
 
         const request = await transaction
           .request()
-          .input("shoppingtractid", sql.Int, shoppingtractid)
+          .input("shoppingtractid", sql.Int, shoppingtrackid)
           .input("item_id", sql.Int, id)
           .input("item_title", sql.VarChar, title)
           .input("item_price", sql.Decimal, price)
@@ -76,7 +93,7 @@ router.post("/shoppingitems", async (req, res) => {
   }
 });
 
-router.put("/shoppingitems/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const pool = await sql.connect(config);
     const request = await pool
@@ -103,7 +120,7 @@ router.put("/shoppingitems/:id", async (req, res) => {
   }
 });
 
-router.delete("/shoppingitems/:id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const pool = await sql.connect(config);
     const request = await pool

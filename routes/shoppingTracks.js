@@ -11,7 +11,6 @@ router.get("/:user_id", async (req, res) => {
     const result = await pool
       .request()
       .query(`SELECT * FROM ShoppingTracks where user_id=${user_id}`);
-    console.log(result);
     res.json(result.recordset);
   } catch (err) {
     res.status(500).send(err);
