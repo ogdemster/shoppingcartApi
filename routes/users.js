@@ -21,7 +21,7 @@ router.get("/:id", async (req, res) => {
       .request()
       .input("id", sql.Int, req.params.id)
       .query("SELECT id,username FROM users WHERE id = @id");
-    console.log(request);
+
     if (request.recordset.length === 0) {
       res.status(404).send("User not found");
     } else {

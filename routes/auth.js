@@ -30,6 +30,38 @@ router.post("/", async (req, res) => {
   }
 });
 
+/* HERE JWT STARTS */
+
+router.post("/api/token", (req, res) => {
+  const { username, password } = req.body;
+
+  // validate the username and password
+  if (username === "admin" && password === "admin") {
+    // generate a JWT token
+    const token = jwt.sign({ username }, secretKey);
+    res.json({ token });
+  } else {
+    res.status(401).json({ message: "Invalid credentials" });
+  }
+});
+
+// middleware to verify the JWT token
+function verifyToken(req, res, next) {
+  // get the token from the header
+  const token = req.headers["authorization"]?.split(" ")[1];
+
+  // verify the token
+  jwt.verify(token, secretKey, (err, decoded) => {
+    if (err) {
+      res.status(401).json({ message: "Invalid token" });
+    } else {
+      // add the decoded username to the request object
+      req.username = decoded.username;
+      next();
+    }
+  });
+}
+
 // router.post("/token", async (req, res) => {
 //   const refreshToken = req.body.token;
 //   if (refreshToken === null) {
