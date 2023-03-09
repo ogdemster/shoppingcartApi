@@ -44,7 +44,7 @@ router.post("/api/token", (req, res) => {
     // console.log(token);
     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
     res.header("Access-Control-Allow-Credentials", "true");
-    res.header(("Access-Control-Allow-Headers", "Set-Cookie"));
+    res.header("Access-Control-Allow-Headers", "Set-Cookie");
     res.set("Set-Cookie", `jwt=${token}; HttpOnly; SameSite=None; Secure`);
 
     // return a success response

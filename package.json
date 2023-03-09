@@ -17,9 +17,11 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.4",
     "mssql": "^9.1.1",
     "nodemon": "^2.0.21"
-  }
+  },
+  "proxy": "http://127.0.0.1:5000"
 }
